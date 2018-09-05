@@ -3,7 +3,7 @@ package session
 
 import (
 	"github.com/imdario/mergo"
-	"github.com/HammerZ3it/clipam/config"
+	"github.com/HammerZ3it/clipam/phpipam"
 )
 
 // timeLayout represents the datetime format returned by the PHPIPAM api.
@@ -18,7 +18,7 @@ type Token struct {
 // Session represents a PHPIPAM session.
 type Session struct {
 	// The session's configuration.
-	Config config.Config
+	Config phpipam.Config
 
 	// The session token.
 	Token Token
@@ -27,9 +27,9 @@ type Session struct {
 // NewSession creates a new session based off supplied configs. It is up to the
 // client for each controller implementation to log in and refresh the token.
 // This is provided in the base client.Client implementation.
-func NewSession(configs ...config.Config) *Session {
+func NewSession(configs ...phpipam.Config) *Session {
 	s := &Session{
-		Config: config.DefaultConfigProvider(),
+		Config: phpipam.DefaultConfigProvider(),
 	}
 	for _, v := range configs {
 		mergo.MergeWithOverwrite(&s.Config, v)

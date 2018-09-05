@@ -13,6 +13,18 @@ import (
 // The default PHPIPAM API endpoint.
 const defaultAPIAddress = "http://localhost/api"
 
+type Config struct {
+	// The application ID required for API requests. This needs to be created in
+	// the PHPIPAM console.
+	AppID string
+	// The API endpoint.
+	Endpoint string
+	// The password for the PHPIPAM account.
+	Password string
+	// The user name for the PHPIPAM account.
+	Username string
+}
+
 func DefaultConfigProvider() Config {
 	env := os.Environ()
 	cfg := Config{

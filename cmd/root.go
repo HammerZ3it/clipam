@@ -16,55 +16,65 @@ package cmd
 
 import (
 	"fmt"
+	"errors"
 	"os"
-
+	"encoding/json"
+	"io/ioutil"
+  "net/http"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/fatih/color"
-	// "github.com/HammerZ3it/clipam/phpipam/client"
-	// "github.com/HammerZ3it/clipam/phpipam/session"
+	"github.com/HammerZ3it/clipam/phpipam"
+	"github.com/HammerZ3it/clipam/phpipam/client"
+	"github.com/HammerZ3it/clipam/phpipam/session"
+	"github.com/HammerZ3it/clipam/config"
 )
 
-var cfgFile string
+var configFile string
+var cli config.Controller
+var sess session.Session
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "clipam",
 	Short: "A brief description of your application",
 	Long: `A longer description`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// load config
-		if err := initConfig(cfgFile); err != nil {
-			return err
+		if err := initConfig(configFile); err != nil {
+					return err
 		}
 
-		addr, err := viper.GetString("Host")
-		if err != nil {
+		addr := viper.GetString("Host")
+		if addr == "" {
 			return errors.New("IPAM Server address must be given")
 		}
 
-		appid, err := viper.GetString("AppID")
-		if err != nil {
+		appid := viper.GetString("AppID")
+		if appid == "" {
 			return errors.New("IPAM appId must be given")
 		}
 
-		user, err := viper.GetString("User")
-		if err != nil {
+		user := viper.GetString("User")
+		if user == "" {
 			return errors.New("IPAM user must be given")
 		}
 
-		password, err := viper.GetString("Password")
-		if err != nil {
+		password := viper.GetString("Password")
+		if password == "" {
 			return errors.New("IPAM user's password must be given")
 		}
 
 		sess := sessionConfig()
-		client := NewController(sess)
+		cli := NewController(sess)
+		fmt.Println(cli)
+		
+		return nil
 
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		olor.Green("\nYour SSH Key is successfully signed")
+		color.Green("\nYour SSH Key is successfully signed")
 		return nil
 	},
 }
@@ -77,27 +87,33 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.clipam.yaml)")
+	// cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/.clipam.yaml)")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 
-func initConfig() {
+func initConfig(cfgFile string) error {
+	// viper.SetEnvPrefix("clipam")
+	// viper.AutomaticEnv()
+
 	// expand ~ in file path
 	expandedCfgFile, err := homedir.Expand(cfgFile)
 	if err != nil {
 		return err
 	}
 	// Use default config file if exists
+	if _, err := os.Stat(expandedCfgFile); err == nil {
+		viper.SetConfigFile(expandedCfgFile)
+		return viper.ReadInConfig()
+	}
+
+	// Use default config file if exists
 	if _, err := os.Stat("/etc/clipam/config.yml"); err == nil {
 		viper.SetConfigFile("/etc/clipam/config.yml")
 		return viper.ReadInConfig()
 	}
-
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	return nil
 }
 
 func NewController(sess *session.Session) *config.Controller {
@@ -109,25 +125,25 @@ func NewController(sess *session.Session) *config.Controller {
 
 func sessionConfig() *session.Session {
 	return &session.Session{
-		Config: config.Config{
-			Host: viper.GetString("Host"),
+		Config: phpipam.Config{
+			Endpoint: viper.GetString("Host"),
 			AppID: viper.GetString("AppID"),
 			Username: viper.GetString("User"),
 			Password: viper.GetString("Password"),
 		},
 		Token: session.Token{
-			String: IpamAuthentification(Config),
+			String: IpamAuthentification(),
 		},
 	}
 }
 
-func IpamAuthentification(cfg Config) string {
+func IpamAuthentification() string {
   var ret config.APIResponse
   var retAuth config.AuthAPIResponse
 
   client := &http.Client{}
-  req, err := http.NewRequest("POST", config.Host + "/api/" + cfg.AppID + "/user/", nil)
-  req.SetBasicAuth(cfg.User, cfg.Password)
+  req, err := http.NewRequest("POST", viper.GetString("Host") + "/api/" + viper.GetString("AppID") + "/user/", nil)
+  req.SetBasicAuth(viper.GetString("User"), viper.GetString("Password"))
   resp, err := client.Do(req)
   defer resp.Body.Close()
 

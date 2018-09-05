@@ -5,7 +5,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/HammerZ3it/clipam/config"
+	"github.com/HammerZ3it/clipam/phpipam"
 	"github.com/HammerZ3it/clipam/phpipam/request"
 	"github.com/HammerZ3it/clipam/phpipam/session"
 )

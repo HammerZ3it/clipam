@@ -42,8 +42,8 @@ to quickly create a Cobra application.`,
 
 func init() {
 
-	addCmd.Flags.StringVarP(
-		&subnetCIDR, "subnet", "n", "network", "Subnet of the new added server")
+	// addCmd.Flags.StringVarP(
+	// 	&subnetCIDR, "subnet", "n", "network", "Subnet of the new added server")
 
 	subnetCmd.AddCommand(subnetDnsCmd)
 
