@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 CUZA Frederic <frederic.cuza@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,14 +15,7 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	// "github.com/HammerZ3it/clipam/config"
-	// "github.com/HammerZ3it/clipam/phpipam"
-	// "github.com/HammerZ3it/clipam/phpipam/client"
-	// "github.com/HammerZ3it/clipam/phpipam/request"
-	// "github.com/HammerZ3it/clipam/phpipam/session"
 )
 
 // subnetCmd represents the subnet command
@@ -36,20 +29,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("subnet called")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(subnetCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// subnetCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// subnetCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

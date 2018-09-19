@@ -10,13 +10,18 @@ type Subnet struct {
 	// The subnet address, in dotted quad format (i.e. A.B.C.D).
 	SubnetAddress string `json:"subnet,omitempty"`
 	// The subnet's mask in number of bits (i.e. 24).
-	Mask phpipam.JSONIntString `json:"mask,omitempty"`
+	// Mask phpipam.JSONIntString `json:"mask,omitempty"
+	Mask int `json:"mask,string,omitempty"`
 	// A detailed description of the subnet.
 	Description string `json:"description,omitempty"`
 	// The section ID to add the subnet to (required when adding).
 	SectionID int `json:"sectionId,string,omitempty"`
 	// The ID of a linked IPv6 subnet.
 	LinkedSubnet int `json:"linked_subnet,string,omitempty"`
+	//
+	ListDNS string `json:"DNS,omitempty"`
+	//
+	Gateway string `json:"Gateway,omitempty"`
 	// The ID of the VLAN that this subnet belongs to.
 	VLANID int `json:"vlanId,string,omitempty"`
 	// The ID of the VRF this subnet belongs to.
@@ -53,5 +58,8 @@ type Subnet struct {
 	Location int `json:"location,string,omitempty"`
 	// The date of the last edit to this resource.
 	EditDate string `json:"editDate,omitempty"`
+	// true if this subnet is on NSX
+	IsNSX phpipam.BoolIntString `json:"is_NSX,omitempty"`
+
 	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
 }

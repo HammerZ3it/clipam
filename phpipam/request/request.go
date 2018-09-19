@@ -174,7 +174,6 @@ func (r *Request) Send() error {
 	if err := resp.ReadResponseJSON(r.Output); err != nil {
 		return err
 	}
-
 	return nil
 }
 

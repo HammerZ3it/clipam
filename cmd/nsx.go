@@ -21,47 +21,27 @@ import (
 	"fmt"
 )
 
-// delCmd represents the del command
-var delCmd = &cobra.Command{
-	Use:   "del",
-	Short: "Delete an entry of a host into ipam",
-	Long: `Usage of clipam del
-	example : - clipam del --h ServerName --subnet "10.103.0.128/25"
-						- clipam del --h ServerName --all`,
+// nsxCmd represents the nsx command
+var nsxCmd = &cobra.Command{
+	Use: "clipam subnet nsx --subnet \"networkCIDR\"",
+	Short: "Allow to know if the given subnet is on NSX or not.",
+	Long: `Usage of clipam subnet nsx
+	example : - clipam subnet nsx --subnet "10.103.0.128/25"`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		sess := sessionConfig()
 		cli := NewController(sess)
 
-		var addressesIDtoDel []int
-
-		addrs, err := cli.GetAdressesID(hostName)
+		sub, err := cli.GetSubnetInfo(subnetCIDR)
 		if err != nil {
 			color.Red(fmt.Sprintf("%s", err))
 			os.Exit(1)
 		}
-		fmt.Println(subnetCIDR)
-		if subnetCIDR == "" {
-			for i := 0; i < len(addrs); i++ {
-			// for i, addr := range addrs {
-      	addressesIDtoDel = append(addressesIDtoDel, addrs[i].ID)
-    	}
-		} else {
-			sub, err := cli.GetSubnetInfo(subnetCIDR)
-			if err != nil {
-				color.Red(fmt.Sprintf("%s", err))
-				os.Exit(1)
-			}
-			for i := 0; i < len(addrs); i++ {
-				if sub[0].ID == addrs[i].SubnetID {
-					addressesIDtoDel = append(addressesIDtoDel, addrs[i].ID)
-				}
-    	}
-		}
-		cli.DeleteAddresses(addressesIDtoDel)
+
+		fmt.Println(sub[0].IsNSX)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(delCmd)
+	subnetCmd.AddCommand(nsxCmd)
 }

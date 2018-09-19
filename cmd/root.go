@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 CUZA Frederic <frederic.cuza@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,41 +35,51 @@ var configFile string
 var cli config.Controller
 var sess session.Session
 
+var hostName string
+var subnetCIDR string
+var IPaddr string
+var all bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "clipam",
-	Short: "A brief description of your application",
-	Long: `A longer description`,
+	Short: "clipam allows to interact with the API of a PHPIPAM server",
+	Long: `Instead of directly call the API, clipam offers a way to interact easier with it
+	example : - ...
+						- ...
+						-	...`,
+
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// load config
 		if err := initConfig(configFile); err != nil {
 					return err
 		}
 
-		addr := viper.GetString("Host")
+		addr := viper.GetString("phpipam_server")
 		if addr == "" {
 			return errors.New("IPAM Server address must be given")
 		}
 
-		appid := viper.GetString("AppID")
+		appid := viper.GetString("phpipam_appid")
 		if appid == "" {
 			return errors.New("IPAM appId must be given")
 		}
 
-		user := viper.GetString("User")
+		user := viper.GetString("phpipam_user")
 		if user == "" {
 			return errors.New("IPAM user must be given")
 		}
 
-		password := viper.GetString("Password")
+		password := viper.GetString("phpipam_password")
 		if password == "" {
 			return errors.New("IPAM user's password must be given")
 		}
 
-		sess := sessionConfig()
-		cli := NewController(sess)
-		fmt.Println(cli)
-		
+		// sess := sessionConfig()
+		// cli := NewController(sess)
+		//
+		// fmt.Println(cli)
+
 		return nil
 
 	},
@@ -88,8 +98,25 @@ func Execute() {
 
 func init() {
 	// cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/.clipam.yaml)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/clipam.yml)")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.PersistentFlags().StringVar(
+		&hostName, "name", "", "Hostname of the server")
+	rootCmd.PersistentFlags().StringVar(
+		&subnetCIDR, "subnet", "", "Subnet of the server")
+	rootCmd.PersistentFlags().StringVar(
+		&IPaddr, "ip", "", "Ip of the entry you want to delete")
+	rootCmd.PersistentFlags().BoolVarP(
+		&all, "all", "a", true, "Delete all entry of the selected hostname in the IPAM database (serveur with multiple nic)")
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// subnetNetmaskCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// subnetNetmaskCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 
@@ -126,10 +153,10 @@ func NewController(sess *session.Session) *config.Controller {
 func sessionConfig() *session.Session {
 	return &session.Session{
 		Config: phpipam.Config{
-			Endpoint: viper.GetString("Host"),
-			AppID: viper.GetString("AppID"),
-			Username: viper.GetString("User"),
-			Password: viper.GetString("Password"),
+			Endpoint: viper.GetString("phpipam_server"),
+			AppID: viper.GetString("phpipam_appid"),
+			Username: viper.GetString("phpipam_user"),
+			Password: viper.GetString("phpipam_password"),
 		},
 		Token: session.Token{
 			String: IpamAuthentification(),
@@ -142,9 +169,12 @@ func IpamAuthentification() string {
   var retAuth config.AuthAPIResponse
 
   client := &http.Client{}
-  req, err := http.NewRequest("POST", viper.GetString("Host") + "/api/" + viper.GetString("AppID") + "/user/", nil)
-  req.SetBasicAuth(viper.GetString("User"), viper.GetString("Password"))
+  req, err := http.NewRequest("POST", viper.GetString("phpipam_server") + "/" + viper.GetString("phpipam_appid") + "/user/", nil)
+  req.SetBasicAuth(viper.GetString("phpipam_user"), viper.GetString("phpipam_password"))
   resp, err := client.Do(req)
+	// if err != nil {
+  //   return nil, err
+	// }
   defer resp.Body.Close()
 
   body, err := ioutil.ReadAll(resp.Body)

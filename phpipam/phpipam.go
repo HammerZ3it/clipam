@@ -11,7 +11,7 @@ import (
 )
 
 // The default PHPIPAM API endpoint.
-const defaultAPIAddress = "http://localhost/api"
+const defaultAPIAddress = "https://ipam.sib.fr/api"
 
 type Config struct {
 	// The application ID required for API requests. This needs to be created in
